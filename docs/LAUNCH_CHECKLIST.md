@@ -37,6 +37,7 @@ Launch assets:
 - Label list: `docs/launch/LABELS.md`
 - Discussion starters: `docs/launch/DISCUSSIONS.md`
 - Announcement copy: `docs/launch/ANNOUNCEMENT.md`
+- Local launch helper: `python scripts/print_launch_tasks.py`
 
 ## First Public Milestone
 
