@@ -17,8 +17,6 @@ on:
 
 permissions:
   contents: read
-  discussions: write
-  issues: read
 
 jobs:
   discussions:
