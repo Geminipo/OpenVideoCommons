@@ -104,50 +104,79 @@ jobs:
               }
             `;
 
-            let data;
             try {
-              data = await github.graphql(repoQuery, { owner, repo });
-            } catch (error) {
-              core.setFailed(`Could not query Discussions. Make sure GitHub Discussions is enabled for this repository. ${error.message}`);
-              return;
-            }
+              const data = await github.graphql(repoQuery, { owner, repo });
+              const repository = data.repository;
+              const categories = new Map(repository.discussionCategories.nodes.map((category) => [category.name.toLowerCase(), category.id]));
+              const existingTitles = new Set(repository.discussions.nodes.map((discussion) => discussion.title));
 
-            const repository = data.repository;
-            const categories = new Map(repository.discussionCategories.nodes.map((category) => [category.name.toLowerCase(), category.id]));
-            const existingTitles = new Set(repository.discussions.nodes.map((discussion) => discussion.title));
-
-            const mutation = `
-              mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
-                createDiscussion(input: {
-                  repositoryId: $repositoryId,
-                  categoryId: $categoryId,
-                  title: $title,
-                  body: $body
-                }) {
-                  discussion {
-                    url
+              const mutation = `
+                mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                  createDiscussion(input: {
+                    repositoryId: $repositoryId,
+                    categoryId: $categoryId,
+                    title: $title,
+                    body: $body
+                  }) {
+                    discussion {
+                      url
+                    }
                   }
                 }
-              }
-            `;
+              `;
 
-            for (const starter of starters) {
-              if (existingTitles.has(starter.title)) {
-                core.info(`Skipped existing discussion: ${starter.title}`);
-                continue;
-              }
+              for (const starter of starters) {
+                if (existingTitles.has(starter.title)) {
+                  core.info(`Skipped existing discussion: ${starter.title}`);
+                  continue;
+                }
 
-              const categoryId = categories.get(starter.category.toLowerCase());
-              if (!categoryId) {
-                core.warning(`Discussion category not found: ${starter.category}. Available categories: ${[...categories.keys()].join(", ")}`);
-                continue;
-              }
+                const categoryId = categories.get(starter.category.toLowerCase());
+                if (!categoryId) {
+                  core.warning(`Discussion category not found: ${starter.category}. Available categories: ${[...categories.keys()].join(", ")}`);
+                  continue;
+                }
 
-              const result = await github.graphql(mutation, {
-                repositoryId: repository.id,
-                categoryId,
-                title: starter.title,
-                body: starter.body,
+                const result = await github.graphql(mutation, {
+                  repositoryId: repository.id,
+                  categoryId,
+                  title: starter.title,
+                  body: starter.body,
+                });
+                core.info(`Created discussion: ${result.createDiscussion.discussion.url}`);
+              }
+            } catch (error) {
+              core.warning(`Could not create discussions automatically: ${error.message}`);
+              const title = "Create starter GitHub Discussions";
+              const existing = await github.paginate(github.rest.issues.listForRepo, {
+                owner,
+                repo,
+                state: "all",
+                per_page: 100,
               });
-              core.info(`Created discussion: ${result.createDiscussion.discussion.url}`);
+              if (existing.some((issue) => issue.title === title && !issue.pull_request)) {
+                core.info(`Fallback issue already exists: ${title}`);
+                return;
+              }
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                labels: ["docs"],
+                body: [
+                  "Automatic discussion creation was not available to this workflow token.",
+                  "",
+                  "Please create the starter discussions from:",
+                  "",
+                  "- `docs/launch/DISCUSSIONS.md`",
+                  "- `docs/operations/DAY_1_RUNBOOK.md`",
+                  "",
+                  "Starter discussion titles:",
+                  "",
+                  "- Introduce yourself and your hardware",
+                  "- Which open video model should OpenVideoCommons benchmark first?",
+                  "- Review the first prompt set: motion-basic-v1",
+                ].join("\n"),
+              });
+              core.info(`Created fallback issue: ${title}`);
             }
