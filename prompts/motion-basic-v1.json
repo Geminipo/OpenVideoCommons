@@ -1,0 +1,32 @@
+{
+  "name": "motion-basic-v1",
+  "version": "1.0.0",
+  "description": "A small starter prompt set for basic motion, camera, and temporal consistency checks.",
+  "prompts": [
+    {
+      "id": "motion-basic-001",
+      "text": "A red bicycle slowly rolls down a quiet city street at sunrise, camera tracking from the side.",
+      "focus": ["object consistency", "camera tracking", "simple motion"]
+    },
+    {
+      "id": "motion-basic-002",
+      "text": "A ceramic cup fills with steaming tea on a wooden table, close-up shot, soft morning light.",
+      "focus": ["fluid motion", "steam", "object stability"]
+    },
+    {
+      "id": "motion-basic-003",
+      "text": "A golden retriever catches a blue frisbee in a grassy park, handheld camera, natural motion.",
+      "focus": ["animal motion", "fast action", "object interaction"]
+    },
+    {
+      "id": "motion-basic-004",
+      "text": "A person in a yellow raincoat walks through shallow puddles at night, reflections on the street.",
+      "focus": ["human motion", "reflections", "lighting consistency"]
+    },
+    {
+      "id": "motion-basic-005",
+      "text": "A small paper boat floats along a narrow stream, overhead camera, gentle water movement.",
+      "focus": ["water motion", "object persistence", "top-down view"]
+    }
+  ]
+}
