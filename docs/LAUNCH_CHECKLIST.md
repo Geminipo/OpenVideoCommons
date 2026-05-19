@@ -30,6 +30,13 @@ git push -u origin main
 - [ ] Create a discussion thread: `Introduce yourself and your hardware`.
 - [ ] Protect `main` once the first external contributor appears.
 
+Launch assets:
+
+- Issue drafts: `docs/launch/issues/`
+- Label list: `docs/launch/LABELS.md`
+- Discussion starters: `docs/launch/DISCUSSIONS.md`
+- Announcement copy: `docs/launch/ANNOUNCEMENT.md`
+
 ## First Public Milestone
 
 - [ ] Recruit 10 benchmark runners.
