@@ -218,6 +218,7 @@ Quality metrics:
 - [ ] Run the `Launch Operations` workflow from the GitHub Actions tab.
 - [ ] Enable GitHub Discussions.
 - [ ] Use `docs/operations/DAY_1_RUNBOOK.md` for the first operating day.
+- [ ] Run the `Discussion Operations` workflow after Discussions are enabled.
 - [ ] Create labels from `docs/launch/LABELS.md`.
 - [ ] Create 6 launch issues from `docs/launch/issues/`.
 - [ ] Create the first discussion: "Introduce yourself and your hardware".

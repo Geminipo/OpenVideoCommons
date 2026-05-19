@@ -8,6 +8,7 @@ Use this after the launch issues exist.
 - [ ] Labels exist: `good first issue`, `benchmark`, `cli`, `model-adapter`, `safety`, `reports`, `governance`.
 - [ ] Discussions are enabled.
 - [ ] Discussion templates are visible for General, Ideas, and Announcements categories.
+- [ ] `Discussion Operations` workflow has created starter discussions.
 - [ ] Actions are enabled.
 - [ ] `Weekly Operations` workflow is enabled.
 

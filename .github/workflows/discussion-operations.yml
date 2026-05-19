@@ -1,0 +1,143 @@
+name: Discussion Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_starters:
+        description: "Create starter discussions if they do not already exist"
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  discussions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const shouldCreate = "${{ inputs.create_starters }}" === "true";
+
+            if (!shouldCreate) {
+              core.info("create_starters=false; nothing to do.");
+              return;
+            }
+
+            const starters = [
+              {
+                category: "General",
+                title: "Introduce yourself and your hardware",
+                body: `OpenVideoCommons Benchmark Round 001 is open.
+
+Please introduce yourself and share:
+
+- Hardware:
+- Operating system:
+- Python version:
+- Video AI models you have tried:
+- How you want to contribute:
+
+Current milestone:
+10 benchmark runners, 5 hardware profiles, and Community Benchmark Report 001.`,
+              },
+              {
+                category: "Ideas",
+                title: "Which open video model should OpenVideoCommons benchmark first?",
+                body: `We need the first official model adapter target.
+
+Please suggest models with:
+
+- Repository link.
+- License.
+- Minimum hardware requirements.
+- Why it matters.
+- Known setup issues.`,
+              },
+              {
+                category: "Ideas",
+                title: "Review the first prompt set: motion-basic-v1",
+                body: `The first prompt set lives at \`prompts/motion-basic-v1.json\`.
+
+What should we add, remove, or rewrite to better test:
+
+- Motion consistency.
+- Camera movement.
+- Object persistence.
+- Human and animal motion.
+- Reflections, water, lighting, and temporal artifacts.`,
+              },
+            ];
+
+            const repoQuery = `
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  id
+                  discussionCategories(first: 50) {
+                    nodes {
+                      id
+                      name
+                    }
+                  }
+                  discussions(first: 100, orderBy: { field: CREATED_AT, direction: DESC }) {
+                    nodes {
+                      title
+                    }
+                  }
+                }
+              }
+            `;
+
+            let data;
+            try {
+              data = await github.graphql(repoQuery, { owner, repo });
+            } catch (error) {
+              core.setFailed(`Could not query Discussions. Make sure GitHub Discussions is enabled for this repository. ${error.message}`);
+              return;
+            }
+
+            const repository = data.repository;
+            const categories = new Map(repository.discussionCategories.nodes.map((category) => [category.name.toLowerCase(), category.id]));
+            const existingTitles = new Set(repository.discussions.nodes.map((discussion) => discussion.title));
+
+            const mutation = `
+              mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                createDiscussion(input: {
+                  repositoryId: $repositoryId,
+                  categoryId: $categoryId,
+                  title: $title,
+                  body: $body
+                }) {
+                  discussion {
+                    url
+                  }
+                }
+              }
+            `;
+
+            for (const starter of starters) {
+              if (existingTitles.has(starter.title)) {
+                core.info(`Skipped existing discussion: ${starter.title}`);
+                continue;
+              }
+
+              const categoryId = categories.get(starter.category.toLowerCase());
+              if (!categoryId) {
+                core.warning(`Discussion category not found: ${starter.category}. Available categories: ${[...categories.keys()].join(", ")}`);
+                continue;
+              }
+
+              const result = await github.graphql(mutation, {
+                repositoryId: repository.id,
+                categoryId,
+                title: starter.title,
+                body: starter.body,
+              });
+              core.info(`Created discussion: ${result.createDiscussion.discussion.url}`);
+            }
