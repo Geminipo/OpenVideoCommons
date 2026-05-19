@@ -126,6 +126,8 @@ Deliverables:
 
 The repository includes a `Weekly Operations` workflow that creates a Monday check-in issue. Use it to keep metrics, blockers, and contributor follow-up visible.
 
+Use `docs/operations/WEEKLY_UPDATE_TEMPLATE.md` for public updates.
+
 Monday: progress update.
 
 - New benchmark records.
@@ -152,6 +154,8 @@ Friday: contributor call.
 ## Outreach Strategy
 
 Start narrow. Do not ask "the world" to join. Ask specific people to do specific actions.
+
+Use `docs/operations/OUTREACH_PLAYBOOK.md` for direct-message templates, public post copy, and outreach tracking.
 
 First 10 outreach targets:
 
