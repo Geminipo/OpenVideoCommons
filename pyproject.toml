@@ -9,7 +9,7 @@ description = "Local contribution tooling for the OpenVideoCommons benchmark net
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-  { name = "Geminipo", email = "" },
+  { name = "Geminipo" },
   { name = "OpenVideoCommons contributors" }
 ]
 classifiers = [
