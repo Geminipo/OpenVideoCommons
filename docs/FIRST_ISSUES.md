@@ -55,7 +55,16 @@ The current validator is a minimal standard-library checker. Add optional JSON S
 
 Labels: `reports`, `cli`
 
-Create a command that reads `results/benchmark/**.json` and updates a Markdown table in `reports/community-benchmark-report-001.md`.
+Improve the existing report generator:
+
+```bash
+python -m ovc generate-report \
+  --results-dir results/benchmark \
+  --title "Community Benchmark Report 001" \
+  --output reports/community-benchmark-report-001.md
+```
+
+Useful next improvements include grouping by model, adding success-rate summaries, and preserving human-written report sections.
 
 ## Governance Issues
 

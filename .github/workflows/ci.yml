@@ -41,3 +41,7 @@ jobs:
             --generation-time-sec 1 \
             --output /tmp/ovc-ci-result.json
           python -m ovc validate /tmp/ovc-ci-result.json
+          python -m ovc generate-report \
+            --results-dir results/benchmark \
+            --title "CI Benchmark Report" \
+            --output /tmp/ovc-ci-report.md

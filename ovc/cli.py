@@ -138,6 +138,70 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
         handle.write("\n")
 
 
+def load_benchmark_results(root: Path) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    if not root.exists():
+        return results
+
+    for path in sorted(root.rglob("*.json")):
+        try:
+            data = load_json(path)
+        except (OSError, json.JSONDecodeError, ValidationError):
+            continue
+        if not validate_result(data):
+            results.append(data)
+    return results
+
+
+def generate_report(results: list[dict[str, Any]], title: str = "Community Benchmark Report") -> str:
+    lines = [
+        f"# {title}",
+        "",
+        "Status: generated",
+        "",
+        "## Summary",
+        "",
+        f"- Benchmark records: {len(results)}",
+        f"- Models covered: {_count_unique(results, ['model', 'name'])}",
+        f"- Hardware profiles: {_count_hardware_profiles(results)}",
+        f"- Contributors: {_count_unique(results, ['contributor', 'github'])}",
+        "",
+        "## Results",
+        "",
+        "| Model | Hardware | Prompt Set | Status | Runtime | Contributor |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+
+    if results:
+        for result in sorted(results, key=_result_sort_key):
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        _markdown_cell(_get_nested(result, ["model", "name"]) or "unknown"),
+                        _markdown_cell(_hardware_label(result)),
+                        _markdown_cell(_get_nested(result, ["prompt_set", "name"]) or "unknown"),
+                        _markdown_cell(_get_nested(result, ["run", "status"]) or "unknown"),
+                        _markdown_cell(_runtime_label(_get_nested(result, ["run", "generation_time_sec"]))),
+                        _markdown_cell(_get_nested(result, ["contributor", "github"]) or "unknown"),
+                    ]
+                )
+                + " |"
+            )
+    else:
+        lines.append("| No valid records found | - | - | - | - | - |")
+
+    lines.extend(
+        [
+            "",
+            "## Notes",
+            "",
+            "This report is generated from validated benchmark result JSON files.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def _require_nested(errors: list[str], data: dict[str, Any], path: list[str]) -> None:
     value = _get_nested(data, path)
     if value in (None, ""):
@@ -151,6 +215,40 @@ def _get_nested(data: dict[str, Any], path: list[str]) -> Any:
             return None
         current = current[key]
     return current
+
+
+def _count_unique(results: list[dict[str, Any]], path: list[str]) -> int:
+    return len({value for result in results if (value := _get_nested(result, path))})
+
+
+def _count_hardware_profiles(results: list[dict[str, Any]]) -> int:
+    return len({_hardware_label(result) for result in results if _hardware_label(result) != "unknown"})
+
+
+def _hardware_label(result: dict[str, Any]) -> str:
+    gpu = _get_nested(result, ["hardware", "gpu"])
+    if gpu:
+        return str(gpu)
+    platform_name = _get_nested(result, ["hardware", "platform"])
+    return str(platform_name or "unknown")
+
+
+def _runtime_label(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return f"{value:.1f}s"
+    return "unknown"
+
+
+def _markdown_cell(value: Any) -> str:
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def _result_sort_key(result: dict[str, Any]) -> tuple[str, str, str]:
+    return (
+        str(_get_nested(result, ["model", "name"]) or ""),
+        str(_get_nested(result, ["hardware", "gpu"]) or _get_nested(result, ["hardware", "platform"]) or ""),
+        str(_get_nested(result, ["contributor", "github"]) or ""),
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -181,6 +279,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = subparsers.add_parser("validate", help="Validate a benchmark result JSON file.")
     validate.add_argument("path", type=Path, help="Path to result JSON.")
+
+    report = subparsers.add_parser("generate-report", help="Generate a Markdown benchmark report from result JSON files.")
+    report.add_argument("--results-dir", type=Path, default=Path("results/benchmark"), help="Directory containing benchmark result JSON files.")
+    report.add_argument("--title", default="Community Benchmark Report", help="Markdown report title.")
+    report.add_argument("--output", required=True, type=Path, help="Path to write the Markdown report.")
 
     return parser
 
@@ -216,6 +319,14 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"error: {error}", file=sys.stderr)
             return 1
         print(f"Valid benchmark result: {args.path}")
+        return 0
+
+    if args.command_name == "generate-report":
+        results = load_benchmark_results(args.results_dir)
+        report = generate_report(results, title=args.title)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(report, encoding="utf-8")
+        print(f"Wrote benchmark report with {len(results)} records to {args.output}")
         return 0
 
     parser.error("Unknown command")

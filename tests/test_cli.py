@@ -4,7 +4,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ovc.cli import create_result, detect_hardware, detect_software, validate_result, write_json
+from ovc.cli import (
+    create_result,
+    detect_hardware,
+    detect_software,
+    generate_report,
+    load_benchmark_results,
+    validate_result,
+    write_json,
+)
 
 
 class CliTests(unittest.TestCase):
@@ -52,6 +60,53 @@ class CliTests(unittest.TestCase):
 
             self.assertTrue(path.exists())
             self.assertEqual({"schema_version": "0.1.0"}, json.loads(path.read_text(encoding="utf-8")))
+
+    def test_load_benchmark_results_skips_invalid_records(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            valid = root / "results" / "wan2.1" / "valid.json"
+            invalid = root / "results" / "wan2.1" / "invalid.json"
+            write_json(valid, self._valid_result("alice", "RTX 4090", 42))
+            write_json(invalid, {"schema_version": "0.1.0"})
+
+            results = load_benchmark_results(root / "results")
+
+            self.assertEqual(1, len(results))
+            self.assertEqual("alice", results[0]["contributor"]["github"])
+
+    def test_generate_report_contains_summary_table(self):
+        results = [
+            self._valid_result("alice", "RTX 4090", 42),
+            self._valid_result("bob", "Apple M4", 84),
+        ]
+
+        report = generate_report(results, title="Test Report")
+
+        self.assertIn("# Test Report", report)
+        self.assertIn("- Hardware profiles: 2", report)
+        self.assertIn("| wan2.1 | RTX 4090 | motion-basic-v1 | success | 42.0s | alice |", report)
+        self.assertIn("| wan2.1 | Apple M4 | motion-basic-v1 | success | 84.0s | bob |", report)
+
+    def _valid_result(self, github: str, gpu: str, generation_time_sec: float):
+        args = argparse.Namespace(
+            github=github,
+            model="wan2.1",
+            model_version="starter",
+            model_source="",
+            prompt_set="motion-basic-v1",
+            prompt_set_version="1.0.0",
+            task_id=f"benchmark-{github}",
+            generation_time_sec=generation_time_sec,
+            output_hash=None,
+            log_hash=None,
+            output_uri=None,
+            command="ovc benchmark --model wan2.1",
+            notes="test run",
+            success=True,
+        )
+        result = create_result(args)
+        result["hardware"]["gpu"] = gpu
+        return result
 
 
 if __name__ == "__main__":

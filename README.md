@@ -51,6 +51,10 @@ python -m ovc create-result \
   --generation-time-sec 312 \
   --output results/benchmark/sample-result.json
 python -m ovc validate results/benchmark/sample-result.json
+python -m ovc generate-report \
+  --results-dir results/benchmark \
+  --title "Community Benchmark Report 001" \
+  --output reports/community-benchmark-report-001.md
 ```
 
 Run the test suite:
