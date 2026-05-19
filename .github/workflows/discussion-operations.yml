@@ -1,6 +1,11 @@
 name: Discussion Operations
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/discussion-operations.yml"
+      - "docs/launch/DISCUSSIONS.md"
   workflow_dispatch:
     inputs:
       create_starters:
@@ -23,7 +28,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const shouldCreate = "${{ inputs.create_starters }}" === "true";
+            const shouldCreate = context.eventName === "push" || "${{ inputs.create_starters || 'true' }}" === "true";
 
             if (!shouldCreate) {
               core.info("create_starters=false; nothing to do.");
