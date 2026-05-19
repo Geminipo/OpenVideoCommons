@@ -209,6 +209,7 @@ Quality metrics:
 
 ## Immediate Checklist
 
+- [ ] Run the `Launch Operations` workflow from the GitHub Actions tab.
 - [ ] Enable GitHub Discussions.
 - [ ] Create labels from `docs/launch/LABELS.md`.
 - [ ] Create 6 launch issues from `docs/launch/issues/`.

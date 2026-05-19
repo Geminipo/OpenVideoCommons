@@ -1,0 +1,112 @@
+name: Launch Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_labels:
+        description: "Create or update launch labels"
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      create_issues:
+        description: "Create launch issues if they do not already exist"
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const createLabels = "${{ inputs.create_labels }}" === "true";
+            const createIssues = "${{ inputs.create_issues }}" === "true";
+
+            const labels = [
+              { name: "good first issue", color: "7057ff", description: "Beginner-friendly tasks" },
+              { name: "help wanted", color: "008672", description: "Contributions actively requested" },
+              { name: "benchmark", color: "1d76db", description: "Benchmark records, tasks, and methods" },
+              { name: "cli", color: "5319e7", description: "Local command-line tooling" },
+              { name: "schema", color: "c5def5", description: "JSON schemas and validation" },
+              { name: "reports", color: "fbca04", description: "Generated and human-written reports" },
+              { name: "prompt-set", color: "bfdadc", description: "Benchmark prompts" },
+              { name: "model-adapter", color: "d4c5f9", description: "Model-specific setup and execution" },
+              { name: "research", color: "0e8a16", description: "Evaluation methods and analysis" },
+              { name: "governance", color: "fef2c0", description: "Maintainer and decision process" },
+              { name: "data", color: "006b75", description: "Dataset and provenance work" },
+              { name: "safety", color: "b60205", description: "Abuse prevention, privacy, and legal risk" },
+              { name: "docs", color: "0075ca", description: "Documentation improvements" },
+              { name: "bug", color: "d73a4a", description: "Reproducible defects" },
+            ];
+
+            async function upsertLabel(label) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+                await github.rest.issues.updateLabel({ owner, repo, name: label.name, color: label.color, description: label.description });
+                core.info(`Updated label: ${label.name}`);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+                core.info(`Created label: ${label.name}`);
+              }
+            }
+
+            function parseIssueDraft(filePath) {
+              const raw = fs.readFileSync(filePath, "utf8").trim();
+              const lines = raw.split(/\r?\n/);
+              const title = lines[0].replace(/^#\s*/, "").trim();
+              const labelLine = lines.find((line) => line.startsWith("Labels:")) || "";
+              const issueLabels = [...labelLine.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
+              return { title, labels: issueLabels, body: raw };
+            }
+
+            async function issueExists(title) {
+              const issues = await github.paginate(github.rest.issues.listForRepo, {
+                owner,
+                repo,
+                state: "all",
+                per_page: 100,
+              });
+              return issues.some((issue) => issue.title === title && !issue.pull_request);
+            }
+
+            if (createLabels) {
+              for (const label of labels) {
+                await upsertLabel(label);
+              }
+            }
+
+            if (createIssues) {
+              const issuesDir = "docs/launch/issues";
+              const files = fs.readdirSync(issuesDir).filter((file) => file.endsWith(".md")).sort();
+              for (const file of files) {
+                const issue = parseIssueDraft(path.join(issuesDir, file));
+                if (await issueExists(issue.title)) {
+                  core.info(`Skipped existing issue: ${issue.title}`);
+                  continue;
+                }
+                await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title: issue.title,
+                  body: issue.body,
+                  labels: issue.labels,
+                });
+                core.info(`Created issue: ${issue.title}`);
+              }
+            }
