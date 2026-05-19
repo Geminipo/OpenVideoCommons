@@ -27,6 +27,7 @@ git push -u origin main
 - [ ] Run the `Launch Operations` workflow from the GitHub Actions tab to create labels and first issues.
 - [ ] Confirm the `Weekly Operations` workflow is enabled for Monday check-ins.
 - [ ] Enable GitHub Discussions.
+- [ ] Confirm discussion forms from `.github/DISCUSSION_TEMPLATE/` appear after Discussions are enabled.
 - [ ] Add issue labels: `good first issue`, `benchmark`, `schema`, `docs`, `governance`, `model-adapter`, `safety`, `data`.
 - [ ] Create pinned issues for first benchmark contributors.
 - [ ] Create a discussion thread: `Introduce yourself and your hardware`.

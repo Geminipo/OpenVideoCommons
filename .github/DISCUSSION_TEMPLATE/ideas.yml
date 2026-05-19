@@ -1,0 +1,43 @@
+title: "[Idea] "
+labels: ["ideas"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for benchmark ideas, model adapter suggestions, prompt sets, evaluation methods, or community proposals.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: "What should OpenVideoCommons try?"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Benchmark method
+        - Model adapter
+        - Prompt set
+        - Human evaluation
+        - Report format
+        - Data governance
+        - Community operations
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why does this matter?
+      description: Explain the user value, technical value, or community value.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed next step
+      description: Keep the first step small and verifiable.
+    validations:
+      required: true

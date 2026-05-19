@@ -1,0 +1,42 @@
+title: "[Intro] "
+labels: ["community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to OpenVideoCommons. Use this form to introduce yourself, your hardware, and how you want to help.
+  - type: input
+    id: handle
+    attributes:
+      label: GitHub handle
+      placeholder: "@your-handle"
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware and environment
+      description: Share GPU, CPU, Apple Silicon, RAM/VRAM, OS, and Python version if known.
+      placeholder: "Example: RTX 4090, 24GB VRAM, Ubuntu 24.04, Python 3.12"
+    validations:
+      required: true
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: How would you like to contribute?
+      options:
+        - Run smoke tests or benchmarks
+        - Improve CLI or schemas
+        - Design prompts or evaluation rubrics
+        - Review safety, data, or licensing
+        - Write docs or community updates
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything else the community should know?
+    validations:
+      required: false

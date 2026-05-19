@@ -1,0 +1,41 @@
+title: "[Update] "
+labels: ["announcement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for public project updates, weekly reports, and benchmark round announcements.
+  - type: input
+    id: headline
+    attributes:
+      label: Headline
+      placeholder: "This week in OpenVideoCommons..."
+    validations:
+      required: true
+  - type: textarea
+    id: shipped
+    attributes:
+      label: What shipped?
+      value: |
+        - 
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      value: |
+        - Benchmark records:
+        - Hardware profiles:
+        - Contributors:
+        - Open issues:
+    validations:
+      required: true
+  - type: textarea
+    id: help
+    attributes:
+      label: Help wanted
+      value: |
+        - 
+    validations:
+      required: true
