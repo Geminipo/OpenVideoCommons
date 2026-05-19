@@ -126,6 +126,7 @@ Start here:
 - Repository: https://github.com/Geminipo/OpenVideoCommons
 - First issue: `Validate the sample benchmark flow on your machine`
 - First report: `reports/community-benchmark-report-001.md`
+- Early notes: `reports/early-smoke-test-notes-001.md`
 - Operating plan: `docs/OPERATING_PLAN.md`
 
 OpenVideoCommons is an experiment in building video AI infrastructure in the open.

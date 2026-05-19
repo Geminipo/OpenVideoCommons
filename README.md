@@ -41,6 +41,34 @@ See [docs/OPERATING_PLAN.md](docs/OPERATING_PLAN.md) for the 30/60/90 day execut
 
 Read [Launch Note 001](reports/launch-note-001.md) for the public project rationale and first contribution path.
 
+## First Contribution: Hardware Smoke Test
+
+The easiest way to help is to submit a hardware smoke-test record. This does **not** run a heavy video model.
+
+```bash
+git clone https://github.com/Geminipo/OpenVideoCommons.git
+cd OpenVideoCommons
+python -m pip install -e .
+python -m ovc doctor
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
+python -m ovc validate results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
+```
+
+If auto-detection misses your hardware, add manual fields:
+
+```bash
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --gpu "RTX 4090" \
+  --vram-gb 24 \
+  --ram-gb 64 \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME-rtx4090.json
+```
+
+Open a pull request with the generated JSON, or paste your `doctor` output into issue #1.
+
 ## Why This Exists
 
 Video AI is becoming a major creative and scientific infrastructure. Today, much of that infrastructure is concentrated inside a small number of closed labs with private data, private evaluations, and private training systems.
