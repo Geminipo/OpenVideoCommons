@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,7 +19,7 @@ class ValidationError(ValueError):
 
 
 def detect_hardware() -> dict[str, Any]:
-    return {
+    hardware = {
         "platform": platform.platform(),
         "machine": platform.machine(),
         "processor": platform.processor() or None,
@@ -26,6 +28,45 @@ def detect_hardware() -> dict[str, Any]:
         "vram_gb": None,
         "ram_gb": None,
     }
+    hardware.update(_detect_nvidia_gpu())
+    if platform.system() == "Darwin" and not hardware.get("gpu"):
+        hardware.update(_detect_apple_chip())
+    return hardware
+
+
+def parse_nvidia_smi(output: str) -> dict[str, Any]:
+    rows = []
+    for line in output.splitlines():
+        parts = [part.strip() for part in line.split(",")]
+        if len(parts) < 2 or not parts[0]:
+            continue
+        try:
+            vram_gb = round(float(parts[1]) / 1024, 1)
+        except ValueError:
+            vram_gb = None
+        rows.append({"name": parts[0], "vram_gb": vram_gb})
+
+    if not rows:
+        return {}
+
+    detected: dict[str, Any] = {
+        "gpu": "; ".join(row["name"] for row in rows),
+    }
+    vram_values = [row["vram_gb"] for row in rows if row["vram_gb"] is not None]
+    if vram_values:
+        detected["vram_gb"] = max(vram_values)
+    return detected
+
+
+def parse_apple_chip(output: str) -> dict[str, Any]:
+    chip = _match_first(output, r"Chip:\s*(.+)")
+    memory = _match_first(output, r"Memory:\s*([0-9]+(?:\.[0-9]+)?)\s*GB")
+    detected: dict[str, Any] = {}
+    if chip:
+        detected["gpu"] = f"{chip} integrated GPU"
+    if memory:
+        detected["ram_gb"] = float(memory)
+    return detected
 
 
 def detect_software() -> dict[str, Any]:
@@ -36,6 +77,45 @@ def detect_software() -> dict[str, Any]:
         "cuda": None,
         "torch": None,
     }
+
+
+def _detect_nvidia_gpu() -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if result.returncode != 0:
+        return {}
+    return parse_nvidia_smi(result.stdout)
+
+
+def _detect_apple_chip() -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["system_profiler", "SPHardwareDataType"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if result.returncode != 0:
+        return {}
+    return parse_apple_chip(result.stdout)
+
+
+def _match_first(text: str, pattern: str) -> str | None:
+    match = re.search(pattern, text)
+    if not match:
+        return None
+    return match.group(1).strip()
 
 
 def create_result(args: argparse.Namespace) -> dict[str, Any]:

@@ -10,6 +10,8 @@ from ovc.cli import (
     detect_software,
     generate_report,
     load_benchmark_results,
+    parse_apple_chip,
+    parse_nvidia_smi,
     validate_result,
     write_json,
 )
@@ -22,6 +24,30 @@ class CliTests(unittest.TestCase):
 
         self.assertTrue(hardware["platform"])
         self.assertTrue(software["python"])
+
+    def test_parse_nvidia_smi_output(self):
+        output = "NVIDIA GeForce RTX 4090, 24564\nNVIDIA GeForce RTX 3090, 24576\n"
+
+        result = parse_nvidia_smi(output)
+
+        self.assertEqual("NVIDIA GeForce RTX 4090; NVIDIA GeForce RTX 3090", result["gpu"])
+        self.assertEqual(24.0, result["vram_gb"])
+
+    def test_parse_apple_chip_output(self):
+        output = """
+Hardware:
+
+    Hardware Overview:
+
+      Chip: Apple M4 Pro
+      Total Number of Cores: 14 (10 performance and 4 efficiency)
+      Memory: 48 GB
+"""
+
+        result = parse_apple_chip(output)
+
+        self.assertEqual("Apple M4 Pro integrated GPU", result["gpu"])
+        self.assertEqual(48.0, result["ram_gb"])
 
     def test_create_result_is_valid(self):
         args = argparse.Namespace(
