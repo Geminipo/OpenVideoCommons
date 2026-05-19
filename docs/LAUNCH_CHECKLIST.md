@@ -29,6 +29,7 @@ git push -u origin main
 - [ ] Enable GitHub Discussions.
 - [ ] Confirm discussion forms from `.github/DISCUSSION_TEMPLATE/` appear after Discussions are enabled.
 - [ ] Run the `Discussion Operations` workflow to create starter discussions.
+- [ ] Run the `Repository Hygiene` workflow or manually add topics from `docs/operations/REPOSITORY_HYGIENE.md`.
 - [ ] Add issue labels: `good first issue`, `benchmark`, `schema`, `docs`, `governance`, `model-adapter`, `safety`, `data`.
 - [ ] Create pinned issues for first benchmark contributors.
 - [ ] Create a discussion thread: `Introduce yourself and your hardware`.

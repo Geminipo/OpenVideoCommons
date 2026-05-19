@@ -1,0 +1,62 @@
+name: Repository Hygiene
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_metadata:
+        description: "Update repository description, homepage, and topics"
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  contents: read
+  metadata: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const shouldUpdate = "${{ inputs.update_metadata }}" === "true";
+
+            if (!shouldUpdate) {
+              core.info("update_metadata=false; nothing to do.");
+              return;
+            }
+
+            const description = "The global open lab for video AI: transparent benchmarks, reproducible evaluation, and community-powered open video model progress.";
+            const homepage = "https://github.com/Geminipo/OpenVideoCommons";
+            const topics = [
+              "video-ai",
+              "open-source",
+              "benchmark",
+              "generative-ai",
+              "computer-vision",
+              "evaluation",
+              "community",
+              "open-video",
+            ];
+
+            await github.rest.repos.update({
+              owner,
+              repo,
+              description,
+              homepage,
+              has_issues: true,
+              has_projects: true,
+              has_wiki: false,
+            });
+            core.info("Updated repository metadata.");
+
+            await github.rest.repos.replaceAllTopics({
+              owner,
+              repo,
+              names: topics,
+            });
+            core.info(`Updated topics: ${topics.join(", ")}`);
