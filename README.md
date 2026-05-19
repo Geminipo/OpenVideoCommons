@@ -39,6 +39,8 @@ The first public milestone is simple: **10 benchmark runners, 5 hardware profile
 
 See [docs/OPERATING_PLAN.md](docs/OPERATING_PLAN.md) for the 30/60/90 day execution plan.
 
+Read [Launch Note 001](reports/launch-note-001.md) for the public project rationale and first contribution path.
+
 ## Why This Exists
 
 Video AI is becoming a major creative and scientific infrastructure. Today, much of that infrastructure is concentrated inside a small number of closed labs with private data, private evaluations, and private training systems.

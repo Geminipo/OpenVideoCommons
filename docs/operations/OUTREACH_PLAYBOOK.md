@@ -26,6 +26,8 @@ python -m ovc create-smoke-result --github YOUR_GITHUB_USERNAME --output /tmp/ov
 
 ## Direct Message Template
 
+Prefer linking to `reports/launch-note-001.md` before asking for a contribution.
+
 ```text
 Hi, I am launching OpenVideoCommons, a community benchmark network for open video AI.
 
@@ -34,6 +36,7 @@ We are starting small: collect reproducible benchmark and smoke-test results for
 If you have a GPU or Apple Silicon machine, would you be open to running the first smoke-test flow and sharing feedback?
 
 Repo: https://github.com/Geminipo/OpenVideoCommons
+Launch note: https://github.com/Geminipo/OpenVideoCommons/blob/main/reports/launch-note-001.md
 ```
 
 ## Follow-Up Template
