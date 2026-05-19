@@ -10,6 +10,31 @@ Our route is intentionally simple:
 
 We are not starting with large-scale distributed training. We are starting with the part every serious open video model needs first: credible, reproducible, community-powered evaluation on real consumer hardware.
 
+## Benchmark Round 001 Is Open
+
+We are looking for the first contributors to validate OpenVideoCommons on real machines.
+
+Your first contribution can be small:
+
+```bash
+git clone https://github.com/Geminipo/OpenVideoCommons.git
+cd OpenVideoCommons
+python -m unittest discover -s tests
+python -m ovc detect-hardware
+python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
+```
+
+Then open an issue or discussion with:
+
+- Your operating system and Python version.
+- Your CPU/GPU or Apple Silicon hardware.
+- Whether the CLI worked.
+- Any friction, error, or setup confusion.
+
+The first public milestone is simple: **10 benchmark runners, 5 hardware profiles, and Community Benchmark Report 001.**
+
+See [docs/OPERATING_PLAN.md](docs/OPERATING_PLAN.md) for the 30/60/90 day execution plan.
+
 ## Why This Exists
 
 Video AI is becoming a major creative and scientific infrastructure. Today, much of that infrastructure is concentrated inside a small number of closed labs with private data, private evaluations, and private training systems.
