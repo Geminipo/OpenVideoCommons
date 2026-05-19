@@ -124,6 +124,8 @@ Deliverables:
 
 ## Weekly Operating Rhythm
 
+The repository includes a `Weekly Operations` workflow that creates a Monday check-in issue. Use it to keep metrics, blockers, and contributor follow-up visible.
+
 Monday: progress update.
 
 - New benchmark records.
@@ -217,3 +219,4 @@ Quality metrics:
 - [ ] Post the short launch announcement.
 - [ ] Ask 10 target contributors to run the smoke test.
 - [ ] Publish the first weekly progress update.
+- [ ] Confirm the `Weekly Operations` workflow is enabled.

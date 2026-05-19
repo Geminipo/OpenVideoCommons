@@ -1,0 +1,99 @@
+name: Weekly Operations
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const now = new Date();
+            const date = now.toISOString().slice(0, 10);
+            const title = `Weekly operations check-in: ${date}`;
+
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              labels: "operations",
+              per_page: 100,
+            });
+
+            if (existing.some((issue) => issue.title === title && !issue.pull_request)) {
+              core.info(`Weekly check-in already exists: ${title}`);
+              return;
+            }
+
+            const body = `# Weekly operations check-in
+
+Date: ${date}
+
+## Metrics
+
+- Stars:
+- Open issues:
+- External pull requests:
+- Benchmark records:
+- Hardware profiles:
+- Active contributors:
+
+## What Shipped
+
+- [ ] Code/tooling:
+- [ ] Documentation:
+- [ ] Benchmark/report:
+- [ ] Community:
+
+## Current Blockers
+
+- [ ] Contributor onboarding:
+- [ ] Benchmark reproducibility:
+- [ ] Hardware coverage:
+- [ ] Model adapter:
+- [ ] Safety/data governance:
+
+## This Week's Focus
+
+- [ ] Reply to all open issues and PRs.
+- [ ] Ask 3-5 specific people to run the smoke test.
+- [ ] Update or regenerate the community benchmark report if new records landed.
+- [ ] Promote one good first issue.
+- [ ] Thank contributors publicly.
+
+## Notes
+
+Use this issue to keep the project operating rhythm visible. Close it when the weekly update has been posted.`;
+
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: "operations" });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({
+                owner,
+                repo,
+                name: "operations",
+                color: "5319e7",
+                description: "Project operating rhythm and weekly check-ins",
+              });
+            }
+
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: ["operations"],
+            });
+
+            core.info(`Created weekly check-in: ${title}`);
