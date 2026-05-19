@@ -12,6 +12,7 @@ cd OpenVideoCommons
 python -m unittest discover -s tests
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
+python -m ovc create-smoke-result --github YOUR_GITHUB_USERNAME --output /tmp/ovc-smoke.json
 ```
 
 ## Target Contributor Profiles
@@ -44,6 +45,7 @@ The first contribution does not require running a heavy video model yet. The cur
 python -m unittest discover -s tests
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
+python -m ovc create-smoke-result --github YOUR_GITHUB_USERNAME --output /tmp/ovc-smoke.json
 
 If anything fails, that failure is useful. We want the first benchmark network to reflect real machines, not ideal lab setups.
 ```

@@ -22,6 +22,9 @@ cd OpenVideoCommons
 python -m unittest discover -s tests
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
 ```
 
 Then open an issue or discussion with:
@@ -76,6 +79,12 @@ python -m ovc create-result \
   --generation-time-sec 312 \
   --output results/benchmark/sample-result.json
 python -m ovc validate results/benchmark/sample-result.json
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --gpu "RTX 4090" \
+  --vram-gb 24 \
+  --ram-gb 64 \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME-rtx4090.json
 python -m ovc generate-report \
   --results-dir results/benchmark \
   --title "Community Benchmark Report 001" \

@@ -120,6 +120,8 @@ def _match_first(text: str, pattern: str) -> str | None:
 
 def create_result(args: argparse.Namespace) -> dict[str, Any]:
     status = "success" if args.success else "failed"
+    hardware = detect_hardware()
+    _apply_hardware_overrides(hardware, args)
     return {
         "schema_version": SCHEMA_VERSION,
         "task_id": args.task_id or f"benchmark-{uuid4().hex[:12]}",
@@ -136,7 +138,7 @@ def create_result(args: argparse.Namespace) -> dict[str, Any]:
             "name": args.prompt_set,
             "version": args.prompt_set_version,
         },
-        "hardware": detect_hardware(),
+        "hardware": hardware,
         "software": detect_software(),
         "run": {
             "status": status,
@@ -154,6 +156,38 @@ def create_result(args: argparse.Namespace) -> dict[str, Any]:
             "reviewers": [],
         },
     }
+
+
+def create_smoke_result(args: argparse.Namespace) -> dict[str, Any]:
+    smoke_args = argparse.Namespace(
+        github=args.github,
+        model="smoke-test",
+        model_version="cli-hardware-detection",
+        model_source="https://github.com/Geminipo/OpenVideoCommons",
+        prompt_set="motion-basic-v1",
+        prompt_set_version="1.0.0",
+        task_id=args.task_id,
+        generation_time_sec=0.0,
+        output_hash=None,
+        log_hash=None,
+        output_uri=None,
+        command="python -m ovc detect-hardware",
+        notes=args.notes or "Smoke-test record for local hardware detection.",
+        success=True,
+        gpu=args.gpu,
+        vram_gb=args.vram_gb,
+        ram_gb=args.ram_gb,
+    )
+    return create_result(smoke_args)
+
+
+def _apply_hardware_overrides(hardware: dict[str, Any], args: argparse.Namespace) -> None:
+    if getattr(args, "gpu", None):
+        hardware["gpu"] = args.gpu
+    if getattr(args, "vram_gb", None) is not None:
+        hardware["vram_gb"] = args.vram_gb
+    if getattr(args, "ram_gb", None) is not None:
+        hardware["ram_gb"] = args.ram_gb
 
 
 def validate_result(data: dict[str, Any]) -> list[str]:
@@ -355,7 +389,15 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--command", default="", help="Reproducible command used for the run.")
     create.add_argument("--notes", default="", help="Free-form run notes.")
     create.add_argument("--success", action=argparse.BooleanOptionalAction, default=True, help="Whether the run succeeded.")
+    _add_hardware_override_args(create)
     create.add_argument("--output", required=True, type=Path, help="Path to write the result JSON.")
+
+    smoke = subparsers.add_parser("create-smoke-result", help="Create a lightweight hardware smoke-test result JSON file.")
+    smoke.add_argument("--github", default="anonymous", help="GitHub username for the contribution record.")
+    smoke.add_argument("--task-id", default="", help="Optional stable task id.")
+    smoke.add_argument("--notes", default="", help="Free-form run notes.")
+    _add_hardware_override_args(smoke)
+    smoke.add_argument("--output", required=True, type=Path, help="Path to write the result JSON.")
 
     validate = subparsers.add_parser("validate", help="Validate a benchmark result JSON file.")
     validate.add_argument("path", type=Path, help="Path to result JSON.")
@@ -366,6 +408,12 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--output", required=True, type=Path, help="Path to write the Markdown report.")
 
     return parser
+
+
+def _add_hardware_override_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--gpu", default=None, help="Override detected GPU label, for example 'RTX 4090'.")
+    parser.add_argument("--vram-gb", type=float, default=None, help="Override detected GPU VRAM in GB.")
+    parser.add_argument("--ram-gb", type=float, default=None, help="Override detected system RAM in GB.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -385,6 +433,17 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         write_json(args.output, result)
         print(f"Wrote benchmark result to {args.output}")
+        return 0
+
+    if args.command_name == "create-smoke-result":
+        result = create_smoke_result(args)
+        errors = validate_result(result)
+        if errors:
+            for error in errors:
+                print(f"error: {error}", file=sys.stderr)
+            return 1
+        write_json(args.output, result)
+        print(f"Wrote smoke-test result to {args.output}")
         return 0
 
     if args.command_name == "validate":

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ovc.cli import (
     create_result,
+    create_smoke_result,
     detect_hardware,
     detect_software,
     generate_report,
@@ -65,6 +66,9 @@ Hardware:
             command="ovc benchmark --model wan2.1",
             notes="test run",
             success=True,
+            gpu=None,
+            vram_gb=None,
+            ram_gb=None,
         )
 
         result = create_result(args)
@@ -72,6 +76,54 @@ Hardware:
         self.assertEqual([], validate_result(result))
         self.assertEqual("benchmark-test-001", result["task_id"])
         self.assertEqual("success", result["run"]["status"])
+
+    def test_create_result_applies_hardware_overrides(self):
+        args = argparse.Namespace(
+            github="alice",
+            model="wan2.1",
+            model_version="",
+            model_source="",
+            prompt_set="motion-basic-v1",
+            prompt_set_version="1.0.0",
+            task_id="benchmark-test-override",
+            generation_time_sec=12.5,
+            output_hash=None,
+            log_hash=None,
+            output_uri=None,
+            command="ovc benchmark --model wan2.1",
+            notes="test run",
+            success=True,
+            gpu="NVIDIA RTX 4090",
+            vram_gb=24.0,
+            ram_gb=64.0,
+        )
+
+        result = create_result(args)
+
+        self.assertEqual([], validate_result(result))
+        self.assertEqual("NVIDIA RTX 4090", result["hardware"]["gpu"])
+        self.assertEqual(24.0, result["hardware"]["vram_gb"])
+        self.assertEqual(64.0, result["hardware"]["ram_gb"])
+
+    def test_create_smoke_result_defaults_to_hardware_check(self):
+        args = argparse.Namespace(
+            github="alice",
+            task_id="smoke-test-alice",
+            notes="smoke test",
+            gpu="Apple M4",
+            vram_gb=None,
+            ram_gb=48.0,
+            output=Path("/tmp/unused.json"),
+        )
+
+        result = create_smoke_result(args)
+
+        self.assertEqual([], validate_result(result))
+        self.assertEqual("smoke-test", result["model"]["name"])
+        self.assertEqual("cli-hardware-detection", result["model"]["version"])
+        self.assertEqual(0.0, result["run"]["generation_time_sec"])
+        self.assertEqual("python -m ovc detect-hardware", result["run"]["command"])
+        self.assertEqual("Apple M4", result["hardware"]["gpu"])
 
     def test_validate_result_reports_missing_fields(self):
         errors = validate_result({"schema_version": "0.1.0"})
@@ -129,6 +181,9 @@ Hardware:
             command="ovc benchmark --model wan2.1",
             notes="test run",
             success=True,
+            gpu=None,
+            vram_gb=None,
+            ram_gb=None,
         )
         result = create_result(args)
         result["hardware"]["gpu"] = gpu

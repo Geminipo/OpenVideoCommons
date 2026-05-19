@@ -25,6 +25,26 @@ No third-party dependencies are required for the initial CLI scaffold.
 
 ## Submitting Benchmark Results
 
+For the first benchmark round, you can submit a lightweight hardware smoke-test result without running a video model:
+
+```bash
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
+python -m ovc validate results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
+```
+
+If automatic hardware detection misses your GPU or memory, add manual overrides:
+
+```bash
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --gpu "RTX 4090" \
+  --vram-gb 24 \
+  --ram-gb 64 \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME-rtx4090.json
+```
+
 Place benchmark results under:
 
 ```text

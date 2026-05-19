@@ -14,6 +14,9 @@ cd OpenVideoCommons
 python -m unittest discover -s tests
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
+python -m ovc create-smoke-result \
+  --github YOUR_GITHUB_USERNAME \
+  --output results/benchmark/smoke-test/YOUR_GITHUB_USERNAME.json
 python -m ovc generate-report \
   --results-dir results/benchmark \
   --title "Community Benchmark Report 001" \
@@ -25,6 +28,7 @@ python -m ovc generate-report \
 - Operating system.
 - Python version.
 - CPU/GPU summary.
+- Whether `create-smoke-result` produced a valid JSON file.
 - Any command that failed.
 - Any setup friction.
 
