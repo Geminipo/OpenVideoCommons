@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   discussions:
@@ -162,7 +163,6 @@ jobs:
                 owner,
                 repo,
                 title,
-                labels: ["docs"],
                 body: [
                   "Automatic discussion creation was not available to this workflow token.",
                   "",
