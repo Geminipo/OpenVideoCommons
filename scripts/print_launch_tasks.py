@@ -12,6 +12,8 @@ def main() -> int:
     print("1. In GitHub, open Actions -> Launch Operations -> Run workflow.")
     print("2. Keep create_labels=true and create_issues=true.")
     print("3. Enable Discussions in repository settings.")
+    print("4. Run Actions -> Discussion Operations -> Run workflow.")
+    print("5. Run Actions -> Repository Hygiene -> Run workflow.")
     print()
     print("If you need to create issues manually, use these drafts:")
     print()
