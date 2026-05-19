@@ -18,6 +18,7 @@ Use Python 3.10 or newer.
 
 ```bash
 python -m unittest discover -s tests
+python -m ovc doctor
 python -m ovc --help
 ```
 

@@ -12,6 +12,7 @@ Help us confirm that the bootstrap CLI works across different machines.
 git clone https://github.com/Geminipo/OpenVideoCommons.git
 cd OpenVideoCommons
 python -m unittest discover -s tests
+python -m ovc doctor
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
 python -m ovc create-smoke-result \
@@ -27,6 +28,7 @@ python -m ovc generate-report \
 
 - Operating system.
 - Python version.
+- `doctor` status.
 - CPU/GPU summary.
 - Whether `create-smoke-result` produced a valid JSON file.
 - Any command that failed.

@@ -20,6 +20,7 @@ Your first contribution can be small:
 git clone https://github.com/Geminipo/OpenVideoCommons.git
 cd OpenVideoCommons
 python -m unittest discover -s tests
+python -m ovc doctor
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
 python -m ovc create-smoke-result \
@@ -72,6 +73,7 @@ This repository currently ships a minimal Python CLI scaffold with no third-part
 
 ```bash
 python -m ovc --help
+python -m ovc doctor
 python -m ovc detect-hardware
 python -m ovc create-result \
   --model wan2.1 \

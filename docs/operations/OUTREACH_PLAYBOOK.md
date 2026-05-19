@@ -10,6 +10,7 @@ Recruit 10 people to run the smoke-test flow:
 git clone https://github.com/Geminipo/OpenVideoCommons.git
 cd OpenVideoCommons
 python -m unittest discover -s tests
+python -m ovc doctor
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
 python -m ovc create-smoke-result --github YOUR_GITHUB_USERNAME --output /tmp/ovc-smoke.json
@@ -43,6 +44,7 @@ Thanks for taking a look.
 The first contribution does not require running a heavy video model yet. The current ask is just to validate the local CLI flow and report your hardware:
 
 python -m unittest discover -s tests
+python -m ovc doctor
 python -m ovc detect-hardware
 python -m ovc validate results/benchmark/wan2.1/example-contributor-local.json
 python -m ovc create-smoke-result --github YOUR_GITHUB_USERNAME --output /tmp/ovc-smoke.json

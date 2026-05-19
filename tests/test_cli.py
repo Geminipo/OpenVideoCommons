@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from ovc.cli import (
+    build_doctor_report,
     create_result,
     create_smoke_result,
     detect_hardware,
@@ -124,6 +125,16 @@ Hardware:
         self.assertEqual(0.0, result["run"]["generation_time_sec"])
         self.assertEqual("python -m ovc detect-hardware", result["run"]["command"])
         self.assertEqual("Apple M4", result["hardware"]["gpu"])
+
+    def test_build_doctor_report_contains_core_checks(self):
+        report = build_doctor_report(results_dir=Path("results/benchmark"))
+
+        self.assertIn("ok", report)
+        self.assertIn("checks", report)
+        self.assertIn("hardware", report)
+        self.assertIn("software", report)
+        self.assertTrue(any(check["name"] == "python_version" for check in report["checks"]))
+        self.assertTrue(any(check["name"] == "results_dir" for check in report["checks"]))
 
     def test_validate_result_reports_missing_fields(self):
         errors = validate_result({"schema_version": "0.1.0"})

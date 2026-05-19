@@ -79,6 +79,76 @@ def detect_software() -> dict[str, Any]:
     }
 
 
+def build_doctor_report(results_dir: Path = Path("results/benchmark")) -> dict[str, Any]:
+    hardware = detect_hardware()
+    software = detect_software()
+    checks = [
+        _doctor_check(
+            "python_version",
+            sys.version_info >= (3, 10),
+            f"Python {platform.python_version()}",
+            "Use Python 3.10 or newer.",
+        ),
+        _doctor_check(
+            "results_dir",
+            results_dir.exists(),
+            f"Results directory: {results_dir}",
+            "Create results by running create-smoke-result or create-result.",
+        ),
+        _doctor_check(
+            "hardware_detected",
+            bool(hardware.get("gpu") or hardware.get("cpu")),
+            f"GPU: {hardware.get('gpu') or 'not detected'}, CPU: {hardware.get('cpu') or 'unknown'}",
+            "Use --gpu/--vram-gb/--ram-gb overrides if automatic detection misses hardware.",
+        ),
+        _doctor_check(
+            "nvidia_smi",
+            _command_available("nvidia-smi"),
+            "nvidia-smi available",
+            "Only required for NVIDIA GPU auto-detection.",
+            required=False,
+        ),
+        _doctor_check(
+            "system_profiler",
+            platform.system() != "Darwin" or _command_available("system_profiler"),
+            "system_profiler available",
+            "Only required for Apple Silicon auto-detection on macOS.",
+            required=platform.system() == "Darwin",
+        ),
+    ]
+    required_checks = [check for check in checks if check["required"]]
+    return {
+        "ok": all(check["ok"] for check in required_checks),
+        "hardware": hardware,
+        "software": software,
+        "checks": checks,
+    }
+
+
+def _doctor_check(name: str, ok: bool, detail: str, hint: str, required: bool = True) -> dict[str, Any]:
+    return {
+        "name": name,
+        "ok": ok,
+        "required": required,
+        "detail": detail,
+        "hint": "" if ok else hint,
+    }
+
+
+def _command_available(command: str) -> bool:
+    try:
+        result = subprocess.run(
+            ["which", command],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
 def _detect_nvidia_gpu() -> dict[str, Any]:
     try:
         result = subprocess.run(
@@ -374,6 +444,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("detect-hardware", help="Print detected local hardware and software metadata.")
 
+    doctor = subparsers.add_parser("doctor", help="Check local environment readiness for OpenVideoCommons contributions.")
+    doctor.add_argument("--results-dir", type=Path, default=Path("results/benchmark"), help="Directory containing benchmark result JSON files.")
+
     create = subparsers.add_parser("create-result", help="Create a self-reported benchmark result JSON file.")
     create.add_argument("--github", default="anonymous", help="GitHub username for the contribution record.")
     create.add_argument("--model", required=True, help="Model name, for example wan2.1.")
@@ -423,6 +496,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command_name == "detect-hardware":
         print(json.dumps({"hardware": detect_hardware(), "software": detect_software()}, indent=2, sort_keys=True))
         return 0
+
+    if args.command_name == "doctor":
+        report = build_doctor_report(results_dir=args.results_dir)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["ok"] else 1
 
     if args.command_name == "create-result":
         result = create_result(args)
