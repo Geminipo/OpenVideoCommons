@@ -38,44 +38,50 @@ jobs:
               {
                 category: "General",
                 title: "Introduce yourself and your hardware",
-                body: `OpenVideoCommons Benchmark Round 001 is open.
-
-Please introduce yourself and share:
-
-- Hardware:
-- Operating system:
-- Python version:
-- Video AI models you have tried:
-- How you want to contribute:
-
-Current milestone:
-10 benchmark runners, 5 hardware profiles, and Community Benchmark Report 001.`,
+                body: [
+                  "OpenVideoCommons Benchmark Round 001 is open.",
+                  "",
+                  "Please introduce yourself and share:",
+                  "",
+                  "- Hardware:",
+                  "- Operating system:",
+                  "- Python version:",
+                  "- Video AI models you have tried:",
+                  "- How you want to contribute:",
+                  "",
+                  "Current milestone:",
+                  "10 benchmark runners, 5 hardware profiles, and Community Benchmark Report 001.",
+                ].join("\n"),
               },
               {
                 category: "Ideas",
                 title: "Which open video model should OpenVideoCommons benchmark first?",
-                body: `We need the first official model adapter target.
-
-Please suggest models with:
-
-- Repository link.
-- License.
-- Minimum hardware requirements.
-- Why it matters.
-- Known setup issues.`,
+                body: [
+                  "We need the first official model adapter target.",
+                  "",
+                  "Please suggest models with:",
+                  "",
+                  "- Repository link.",
+                  "- License.",
+                  "- Minimum hardware requirements.",
+                  "- Why it matters.",
+                  "- Known setup issues.",
+                ].join("\n"),
               },
               {
                 category: "Ideas",
                 title: "Review the first prompt set: motion-basic-v1",
-                body: `The first prompt set lives at \`prompts/motion-basic-v1.json\`.
-
-What should we add, remove, or rewrite to better test:
-
-- Motion consistency.
-- Camera movement.
-- Object persistence.
-- Human and animal motion.
-- Reflections, water, lighting, and temporal artifacts.`,
+                body: [
+                  "The first prompt set lives at `prompts/motion-basic-v1.json`.",
+                  "",
+                  "What should we add, remove, or rewrite to better test:",
+                  "",
+                  "- Motion consistency.",
+                  "- Camera movement.",
+                  "- Object persistence.",
+                  "- Human and animal motion.",
+                  "- Reflections, water, lighting, and temporal artifacts.",
+                ].join("\n"),
               },
             ];
 

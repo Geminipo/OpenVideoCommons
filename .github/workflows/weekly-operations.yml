@@ -35,45 +35,47 @@ jobs:
               return;
             }
 
-            const body = `# Weekly operations check-in
-
-Date: ${date}
-
-## Metrics
-
-- Stars:
-- Open issues:
-- External pull requests:
-- Benchmark records:
-- Hardware profiles:
-- Active contributors:
-
-## What Shipped
-
-- [ ] Code/tooling:
-- [ ] Documentation:
-- [ ] Benchmark/report:
-- [ ] Community:
-
-## Current Blockers
-
-- [ ] Contributor onboarding:
-- [ ] Benchmark reproducibility:
-- [ ] Hardware coverage:
-- [ ] Model adapter:
-- [ ] Safety/data governance:
-
-## This Week's Focus
-
-- [ ] Reply to all open issues and PRs.
-- [ ] Ask 3-5 specific people to run the smoke test.
-- [ ] Update or regenerate the community benchmark report if new records landed.
-- [ ] Promote one good first issue.
-- [ ] Thank contributors publicly.
-
-## Notes
-
-Use this issue to keep the project operating rhythm visible. Close it when the weekly update has been posted.`;
+            const body = [
+              "# Weekly operations check-in",
+              "",
+              `Date: ${date}`,
+              "",
+              "## Metrics",
+              "",
+              "- Stars:",
+              "- Open issues:",
+              "- External pull requests:",
+              "- Benchmark records:",
+              "- Hardware profiles:",
+              "- Active contributors:",
+              "",
+              "## What Shipped",
+              "",
+              "- [ ] Code/tooling:",
+              "- [ ] Documentation:",
+              "- [ ] Benchmark/report:",
+              "- [ ] Community:",
+              "",
+              "## Current Blockers",
+              "",
+              "- [ ] Contributor onboarding:",
+              "- [ ] Benchmark reproducibility:",
+              "- [ ] Hardware coverage:",
+              "- [ ] Model adapter:",
+              "- [ ] Safety/data governance:",
+              "",
+              "## This Week's Focus",
+              "",
+              "- [ ] Reply to all open issues and PRs.",
+              "- [ ] Ask 3-5 specific people to run the smoke test.",
+              "- [ ] Update or regenerate the community benchmark report if new records landed.",
+              "- [ ] Promote one good first issue.",
+              "- [ ] Thank contributors publicly.",
+              "",
+              "## Notes",
+              "",
+              "Use this issue to keep the project operating rhythm visible. Close it when the weekly update has been posted.",
+            ].join("\n");
 
             try {
               await github.rest.issues.getLabel({ owner, repo, name: "operations" });
